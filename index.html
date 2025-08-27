@@ -711,6 +711,32 @@
           </div>
 
           <div class="form-group">
+            <label for="number-count"
+              >How many numbers do you want? (1-10):</label
+            >
+            <select
+              id="number-count"
+              name="number-count"
+              class="form-control"
+              required
+            >
+              <option value="1">1 Number</option>
+              <option value="2">2 Numbers</option>
+              <option value="3">3 Numbers</option>
+              <option value="4">4 Numbers</option>
+              <option value="5" selected>5 Numbers</option>
+              <option value="6">6 Numbers</option>
+              <option value="7">7 Numbers</option>
+              <option value="8">8 Numbers</option>
+              <option value="9">9 Numbers</option>
+              <option value="10">10 Numbers</option>
+            </select>
+            <small class="text-secondary"
+              >Select how many lucky numbers you want to generate</small
+            >
+          </div>
+
+          <div class="form-group">
             <label for="dream-input">Describe Your Dream (Optional):</label>
             <div class="dream-input">
               <textarea
@@ -753,10 +779,25 @@
             <p id="dream-interpretation"></p>
           </div>
           <div class="lucky-numbers" id="lucky-numbers"></div>
+          <div id="numbers-list" style="margin: 1rem 0; display: none">
+            <h3>All Generated Numbers:</h3>
+            <div
+              id="numbers-container"
+              style="
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+                justify-content: center;
+              "
+            ></div>
+          </div>
           <p><strong>Draw Date:</strong> <span id="result-date"></span></p>
           <p><strong>Lottery Type:</strong> <span id="result-type"></span></p>
+          <p>
+            <strong>Numbers Generated:</strong> <span id="result-count"></span>
+          </p>
           <button class="copy-btn" onclick="copyNumbers()">
-            📋 Copy Numbers
+            📋 Copy All Numbers
           </button>
         </div>
       </div>
@@ -1563,22 +1604,28 @@
         const formData = new FormData(e.target);
         const drawDate = formData.get("draw-date");
         const lotteryType = formData.get("lottery-type");
+        const numberCount = formData.get("number-count");
         const dreamInput = formData.get("dream-input");
 
         // Validate form
-        if (!validateForm(drawDate, lotteryType)) {
+        if (!validateForm(drawDate, lotteryType, numberCount)) {
           return;
         }
 
         try {
-          await generateLotteryNumbers(drawDate, lotteryType, dreamInput);
+          await generateLotteryNumbers(
+            drawDate,
+            lotteryType,
+            numberCount,
+            dreamInput
+          );
         } catch (error) {
           showError("Failed to generate numbers. Please try again.");
           console.error("Generation error:", error);
         }
       }
 
-      function validateForm(drawDate, lotteryType) {
+      function validateForm(drawDate, lotteryType, numberCount) {
         clearMessages();
 
         if (!drawDate) {
@@ -1591,6 +1638,11 @@
           return false;
         }
 
+        if (!numberCount) {
+          showError("Please select number count.");
+          return false;
+        }
+
         if (!validateDate()) {
           return false;
         }
@@ -1599,7 +1651,12 @@
       }
 
       // Main lottery number generation function
-      async function generateLotteryNumbers(drawDate, lotteryType, dreamInput) {
+      async function generateLotteryNumbers(
+        drawDate,
+        lotteryType,
+        numberCount,
+        dreamInput
+      ) {
         showLoading(true);
 
         try {
@@ -1621,9 +1678,10 @@
             dreamInterpretation = result.interpretation;
           }
 
-          // Generate final numbers based on AI analysis and patterns
-          const luckyNumbers = generateSmartNumbers(
+          // Generate multiple numbers based on AI analysis and patterns
+          const luckyNumbers = generateMultipleSmartNumbers(
             parseInt(lotteryType),
+            parseInt(numberCount),
             analysisData.suggestedNumbers
           );
 
@@ -2083,6 +2141,45 @@ CONFIDENCE: [High/Medium/Low]`;
         return generateRandomNumbers(digits);
       }
 
+      // Generate multiple smart numbers based on AI analysis
+      function generateMultipleSmartNumbers(digits, count, suggestedNumbers) {
+        const numbers = [];
+        const usedNumbers = new Set();
+
+        for (let i = 0; i < count; i++) {
+          let newNumber;
+          let attempts = 0;
+
+          do {
+            if (
+              suggestedNumbers &&
+              suggestedNumbers.length > 0 &&
+              Math.random() < 0.6
+            ) {
+              // 60% chance to use AI suggested numbers
+              const randomSuggestion =
+                suggestedNumbers[
+                  Math.floor(Math.random() * suggestedNumbers.length)
+                ];
+              if (randomSuggestion && randomSuggestion.length === digits) {
+                newNumber = randomSuggestion.padStart(digits, "0");
+              } else {
+                newNumber = generateRandomNumbers(digits);
+              }
+            } else {
+              // 40% chance for pure random
+              newNumber = generateRandomNumbers(digits);
+            }
+            attempts++;
+          } while (usedNumbers.has(newNumber) && attempts < 50);
+
+          usedNumbers.add(newNumber);
+          numbers.push(newNumber);
+        }
+
+        return numbers;
+      }
+
       // Enhanced error handling for API calls
       async function handleAPIRequest(requestFunction, retries = 2) {
         for (let attempt = 0; attempt <= retries; attempt++) {
@@ -2138,20 +2235,33 @@ CONFIDENCE: [High/Medium/Low]`;
 
       // Copy numbers to clipboard
       async function copyNumbers() {
-        const numbers = document.getElementById("lucky-numbers").textContent;
+        // Get all numbers from the container
+        const numbersContainer = document.getElementById("numbers-container");
+        let textToCopy = "";
+
+        if (numbersContainer && numbersContainer.children.length > 0) {
+          // Multiple numbers - copy all
+          const allNumbers = Array.from(numbersContainer.children).map(
+            (div) => div.textContent
+          );
+          textToCopy = allNumbers.join(" - ");
+        } else {
+          // Single number - copy from main display
+          textToCopy = document.getElementById("lucky-numbers").textContent;
+        }
 
         try {
-          await navigator.clipboard.writeText(numbers);
-          showSuccess("Numbers copied to clipboard!");
+          await navigator.clipboard.writeText(textToCopy);
+          showSuccess("All numbers copied to clipboard!");
         } catch (error) {
           // Fallback for older browsers
           const textArea = document.createElement("textarea");
-          textArea.value = numbers;
+          textArea.value = textToCopy;
           document.body.appendChild(textArea);
           textArea.select();
           document.execCommand("copy");
           document.body.removeChild(textArea);
-          showSuccess("Numbers copied to clipboard!");
+          showSuccess("All numbers copied to clipboard!");
         }
       }
 
@@ -2167,15 +2277,49 @@ CONFIDENCE: [High/Medium/Low]`;
         const luckyNumbersDiv = document.getElementById("lucky-numbers");
         const resultDateSpan = document.getElementById("result-date");
         const resultTypeSpan = document.getElementById("result-type");
+        const resultCountSpan = document.getElementById("result-count");
         const dreamSuggestions = document.getElementById("dream-suggestions");
         const dreamInterpretationP = document.getElementById(
           "dream-interpretation"
         );
         const aiAnalysis = document.getElementById("ai-analysis");
         const analysisResultP = document.getElementById("analysis-result");
+        const numbersList = document.getElementById("numbers-list");
+        const numbersContainer = document.getElementById("numbers-container");
 
-        // Set results
-        luckyNumbersDiv.textContent = numbers;
+        // Handle multiple numbers display
+        if (Array.isArray(numbers)) {
+          // Multiple numbers
+          luckyNumbersDiv.textContent = numbers[0]; // Show first number prominently
+          resultCountSpan.textContent = numbers.length;
+
+          // Display all numbers in container
+          numbersContainer.innerHTML = "";
+          numbers.forEach((number, index) => {
+            const numberDiv = document.createElement("div");
+            numberDiv.style.cssText = `
+              background: var(--primary-color);
+              color: white;
+              padding: 0.5rem 1rem;
+              border-radius: 8px;
+              font-weight: bold;
+              font-size: 1.2rem;
+              min-width: 60px;
+              text-align: center;
+              box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            `;
+            numberDiv.textContent = number;
+            numbersContainer.appendChild(numberDiv);
+          });
+
+          numbersList.style.display = "block";
+        } else {
+          // Single number
+          luckyNumbersDiv.textContent = numbers;
+          resultCountSpan.textContent = "1";
+          numbersList.style.display = "none";
+        }
+
         resultDateSpan.textContent = formatDate(drawDate);
         resultTypeSpan.textContent = `${lotteryType}-Digit Lottery`;
 
@@ -2258,7 +2402,11 @@ CONFIDENCE: [High/Medium/Low]`;
                           item.generatedAt
                         )} | Draw Date: ${formatDate(item.drawDate)}
                     </div>
-                    <div class="history-numbers">${item.numbers}</div>
+                    <div class="history-numbers">${
+                      Array.isArray(item.numbers)
+                        ? item.numbers.join(" - ")
+                        : item.numbers
+                    }</div>
                     <div style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 0.5rem;">
                         ${item.lotteryType}-Digit Lottery
                         ${item.dreamInput ? " | Dream-inspired" : ""}
@@ -2463,6 +2611,31 @@ CONFIDENCE: [High/Medium/Low]`;
           animation-duration: 0.01ms !important;
           animation-iteration-count: 1 !important;
           transition-duration: 0.01ms !important;
+        }
+      }
+
+      /* Multiple numbers display */
+      #numbers-container {
+        animation: fadeInUp 0.6s ease;
+      }
+
+      #numbers-container > div {
+        transition: all 0.3s ease;
+      }
+
+      #numbers-container > div:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
         }
       }
     </style>
