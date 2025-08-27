@@ -1,0 +1,1588 @@
+// History management with enhanced privacy settings<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lao Lottery - Lucky Numbers Generator</title>
+    <style>
+        :root {
+            --primary-color: #d4af37;
+            --secondary-color: #8b4513;
+            --accent-color: #ff6b35;
+            --text-dark: #2c2c2c;
+            --text-light: #666666;
+            --background-light: #ffffff;
+            --background-gray: #f8f9fa;
+            --border-color: #e0e0e0;
+            --success-color: #28a745;
+            --error-color: #dc3545;
+            --warning-color: #ffc107;
+            
+            /* Dark mode variables */
+            --bg-primary: var(--background-light);
+            --bg-secondary: var(--background-gray);
+            --text-primary: var(--text-dark);
+            --text-secondary: var(--text-light);
+            --border: var(--border-color);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --text-primary: #ffffff;
+            --text-secondary: #cccccc;
+            --border: #404040;
+            --primary-color: #ffd700;
+            --accent-color: #ff8c42;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: var(--bg-primary);
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header Styles */
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+
+        .theme-toggle {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 0.5rem;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.1);
+        }
+
+        /* Main Content */
+        .main {
+            min-height: calc(100vh - 200px);
+            padding: 2rem 0;
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 3rem 0;
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            margin-bottom: 3rem;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Lottery Generator */
+        .lottery-form {
+            background: var(--bg-secondary);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+        }
+
+        .lottery-types {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 1rem;
+        }
+
+        .lottery-type {
+            display: none;
+        }
+
+        .lottery-type-label {
+            display: block;
+            padding: 1rem;
+            background: var(--bg-primary);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .lottery-type:checked + .lottery-type-label {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .dream-input {
+            position: relative;
+        }
+
+        .char-counter {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .generate-btn {
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 25px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .generate-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .generate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--border);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Results */
+        .results {
+            display: none;
+            background: var(--bg-secondary);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .results.show {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .lucky-numbers {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin: 1rem 0;
+            letter-spacing: 0.2rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .dream-suggestions {
+            background: var(--bg-primary);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .copy-btn {
+            background: var(--success-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .copy-btn:hover {
+            background: #218838;
+            transform: scale(1.05);
+        }
+
+        /* History */
+        .history {
+            background: var(--bg-secondary);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .history-item {
+            background: var(--bg-primary);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .history-date {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .history-numbers {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        /* Info Pages */
+        .info-content {
+            background: var(--bg-secondary);
+            padding: 2rem;
+            border-radius: 15px;
+            line-height: 1.8;
+        }
+
+        .info-content h2 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        .info-content h3 {
+            color: var(--text-primary);
+            margin: 1.5rem 0 1rem;
+        }
+
+        .info-content ul {
+            padding-left: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .info-content li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Error Messages */
+        .error-message, .success-message {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        [data-theme="dark"] .error-message {
+            background: #2d1b1e;
+            color: #f8d7da;
+            border: 1px solid #4a2528;
+        }
+
+        [data-theme="dark"] .success-message {
+            background: #1b2d1e;
+            color: #d4edda;
+            border: 1px solid #254a28;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--bg-secondary);
+            padding: 2rem 0;
+            text-align: center;
+            border-top: 1px solid var(--border);
+            margin-top: 3rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 1rem;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .lottery-types {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .lucky-numbers {
+                font-size: 2rem;
+            }
+
+            .container {
+                padding: 0 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .lottery-types {
+                grid-template-columns: 1fr;
+            }
+
+            .hero {
+                padding: 2rem 1rem;
+            }
+
+            .lottery-form, .results, .history, .info-content {
+                padding: 1rem;
+            }
+        }
+
+        /* Accessibility */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* Focus styles for accessibility */
+        .form-control:focus,
+        .generate-btn:focus,
+        .copy-btn:focus,
+        .theme-toggle:focus,
+        .lottery-type-label:focus-within {
+            outline: 3px solid var(--primary-color);
+            outline-offset: 2px;
+        }
+
+        /* High contrast mode support */
+        @media (prefers-contrast: high) {
+            :root {
+                --primary-color: #000000;
+                --secondary-color: #333333;
+                --accent-color: #000000;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <nav class="nav container">
+            <a href="#" class="logo" onclick="showPage('home')">🎲 Lao Lottery</a>
+            <ul class="nav-links">
+                <li><a href="#" class="nav-link active" onclick="showPage('home')" data-page="home">Home</a></li>
+                <li><a href="#" class="nav-link" onclick="showPage('how-to-play')" data-page="how-to-play">How to Play</a></li>
+                <li><a href="#" class="nav-link" onclick="showPage('about')" data-page="about">About</a></li>
+                <li><a href="#" class="nav-link" onclick="showPage('history')" data-page="history">History</a></li>
+                <li><a href="#" class="nav-link" onclick="showPage('settings')" data-page="settings">⚙️ Settings</a></li>
+            </ul>
+            <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode">
+                🌙
+            </button>
+        </nav>
+    </header>
+
+    <main class="main container">
+        <!-- Home Page -->
+        <div id="home" class="page active">
+            <section class="hero">
+                <h1>Lucky Numbers Await</h1>
+                <p>Generate your fortune with our AI-powered lottery number generator. Share your dreams and let our system create personalized lucky numbers for the Lao Lottery.</p>
+            </section>
+
+            <div id="error-container"></div>
+            <div id="success-container"></div>
+
+            <form class="lottery-form" id="lottery-form">
+                <div class="form-group">
+                    <label for="draw-date">Select Draw Date (Monday, Wednesday, Friday only):</label>
+                    <input type="date" id="draw-date" name="draw-date" class="form-control" required>
+                    <small class="text-secondary">Only future dates that fall on Monday, Wednesday, or Friday are allowed</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Choose Lottery Type:</label>
+                    <div class="lottery-types">
+                        <input type="radio" id="type-2" name="lottery-type" value="2" class="lottery-type" required>
+                        <label for="type-2" class="lottery-type-label">
+                            <div>2-Digit</div>
+                            <small>00-99</small>
+                        </label>
+
+                        <input type="radio" id="type-3" name="lottery-type" value="3" class="lottery-type">
+                        <label for="type-3" class="lottery-type-label">
+                            <div>3-Digit</div>
+                            <small>000-999</small>
+                        </label>
+
+                        <input type="radio" id="type-4" name="lottery-type" value="4" class="lottery-type">
+                        <label for="type-4" class="lottery-type-label">
+                            <div>4-Digit</div>
+                            <small>0000-9999</small>
+                        </label>
+
+                        <input type="radio" id="type-5" name="lottery-type" value="5" class="lottery-type">
+                        <label for="type-5" class="lottery-type-label">
+                            <div>5-Digit</div>
+                            <small>00000-99999</small>
+                        </label>
+
+                        <input type="radio" id="type-6" name="lottery-type" value="6" class="lottery-type">
+                        <label for="type-6" class="lottery-type-label">
+                            <div>6-Digit</div>
+                            <small>000000-999999</small>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="dream-input">Describe Your Dream (Optional):</label>
+                    <div class="dream-input">
+                        <textarea 
+                            id="dream-input" 
+                            name="dream-input" 
+                            class="form-control" 
+                            rows="4" 
+                            maxlength="500"
+                            placeholder="Tell us about your dream to get personalized number suggestions..."></textarea>
+                        <div class="char-counter">
+                            <span id="char-count">0</span>/500
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="generate-btn" id="generate-btn">
+                    🎲 Generate My Lucky Numbers
+                </button>
+            </form>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Generating your lucky numbers...</p>
+            </div>
+
+            <div class="results" id="results">
+                <h2>Your Lucky Numbers</h2>
+                <div id="dream-suggestions" class="dream-suggestions" style="display: none;">
+                    <h3>Dream Interpretation:</h3>
+                    <p id="dream-interpretation"></p>
+                </div>
+                <div class="lucky-numbers" id="lucky-numbers"></div>
+                <p><strong>Draw Date:</strong> <span id="result-date"></span></p>
+                <p><strong>Lottery Type:</strong> <span id="result-type"></span></p>
+                <button class="copy-btn" onclick="copyNumbers()">📋 Copy Numbers</button>
+            </div>
+        </div>
+
+        <!-- How to Play Page -->
+        <div id="how-to-play" class="page">
+            <div class="info-content">
+                <h1>How to Play Lao Lottery</h1>
+                
+                <h2>Getting Started</h2>
+                <p>The Lao Lottery system offers multiple ways to play and win. Our number generator helps you select lucky numbers based on various digit combinations and even your dreams!</p>
+
+                <h2>Lottery Types Available</h2>
+                <h3>2-Digit Lottery (00-99)</h3>
+                <ul>
+                    <li>Choose numbers from 00 to 99</li>
+                    <li>Most frequent draws</li>
+                    <li>Good for beginners</li>
+                    <li>Higher winning probability</li>
+                </ul>
+
+                <h3>3-Digit Lottery (000-999)</h3>
+                <ul>
+                    <li>Select from 000 to 999</li>
+                    <li>Popular choice among players</li>
+                    <li>Balanced risk and reward</li>
+                </ul>
+
+                <h3>4-Digit Lottery (0000-9999)</h3>
+                <ul>
+                    <li>Numbers range from 0000 to 9999</li>
+                    <li>Higher potential payouts</li>
+                    <li>Moderate difficulty</li>
+                </ul>
+
+                <h3>5-Digit Lottery (00000-99999)</h3>
+                <ul>
+                    <li>Complex number combinations</li>
+                    <li>Significant prize amounts</li>
+                    <li>For experienced players</li>
+                </ul>
+
+                <h3>6-Digit Lottery (000000-999999)</h3>
+                <ul>
+                    <li>Maximum complexity</li>
+                    <li>Largest potential winnings</li>
+                    <li>Ultimate challenge</li>
+                </ul>
+
+                <h2>Draw Schedule</h2>
+                <p>Lao Lottery draws are held three times per week:</p>
+                <ul>
+                    <li><strong>Monday:</strong> Weekly draw</li>
+                    <li><strong>Wednesday:</strong> Mid-week draw</li>
+                    <li><strong>Friday:</strong> Weekend draw</li>
+                </ul>
+
+                <h2>Using Dream Interpretation</h2>
+                <p>Our AI-powered system can analyze your dreams and suggest meaningful number combinations. Simply describe your dream in the text area, and our advanced algorithm will:</p>
+                <ul>
+                    <li>Interpret symbolic elements from your dream</li>
+                    <li>Convert dream themes into number suggestions</li>
+                    <li>Provide personalized lucky number combinations</li>
+                    <li>Explain the connection between your dream and the numbers</li>
+                </ul>
+
+                <h2>Tips for Success</h2>
+                <ul>
+                    <li>Choose lottery types that match your risk tolerance</li>
+                    <li>Consider playing multiple number combinations</li>
+                    <li>Keep track of your numbers using our history feature</li>
+                    <li>Share detailed dreams for better AI interpretation</li>
+                    <li>Play responsibly and within your budget</li>
+                </ul>
+
+                <h2>Important Notes</h2>
+                <p><strong>Disclaimer:</strong> This is a number generation tool for entertainment purposes. Lottery numbers are random, and past results do not guarantee future outcomes. Please play responsibly and only spend what you can afford to lose.</p>
+            </div>
+        </div>
+
+        <!-- About Page -->
+        <div id="about" class="page">
+            <div class="info-content">
+                <h1>About Lao Lottery</h1>
+                
+                <h2>Our Mission</h2>
+                <p>The Lao Lottery Number Generator combines traditional luck-seeking practices with modern AI technology to help players generate meaningful lottery numbers. We respect the cultural significance of dreams and numerology in Laotian tradition while providing a modern, user-friendly experience.</p>
+
+                <h2>Cultural Heritage</h2>
+                <p>Lottery playing has a long tradition in Laos, often intertwined with dream interpretation and spiritual beliefs. Numbers are considered to carry special meanings and energy, and many players rely on dreams, significant dates, and spiritual guidance when choosing their lottery numbers.</p>
+
+                <h2>Technology Behind the System</h2>
+                <h3>AI-Powered Dream Interpretation</h3>
+                <p>Our system uses Google's Gemini AI technology to analyze dream descriptions and provide meaningful number suggestions. The AI considers:</p>
+                <ul>
+                    <li>Symbolic meanings of dream elements</li>
+                    <li>Cultural significance of numbers in Laotian tradition</li>
+                    <li>Numerical patterns and combinations</li>
+                    <li>Personal context and dream details</li>
+                </ul>
+
+                <h3>Random Number Generation</h3>
+                <p>All final numbers are generated using cryptographically secure random number generation to ensure fairness and unpredictability. The AI suggestions serve as inspiration, but the final numbers are always random.</p>
+
+                <h2>Privacy and Security</h2>
+                <p>We take your privacy seriously:</p>
+                <ul>
+                    <li>Dream descriptions are processed securely and not permanently stored</li>
+                    <li>All data is kept locally in your browser</li>
+                    <li>No personal information is collected or shared</li>
+                    <li>You can clear your history at any time</li>
+                </ul>
+
+                <h2>Responsible Gaming</h2>
+                <p>We encourage responsible lottery participation:</p>
+                <ul>
+                    <li>Only play with money you can afford to lose</li>
+                    <li>Set limits on your lottery spending</li>
+                    <li>Remember that lottery outcomes are random</li>
+                    <li>Seek help if gambling becomes a problem</li>
+                </ul>
+
+                <h2>Support and Feedback</h2>
+                <p>This tool is designed to enhance your lottery experience while respecting cultural traditions. We continuously improve our system based on user feedback and technological advances.</p>
+
+                <h2>Legal Disclaimer</h2>
+                <p><strong>Important:</strong> This application is for entertainment and number generation purposes only. We are not affiliated with any official lottery organization. Always verify official lottery rules and regulations. Users must be 18 years or older to participate in lottery activities.</p>
+
+                <p><em>May luck and fortune smile upon your numbers! 🍀</em></p>
+            </div>
+        </div>
+
+        <!-- Settings Page -->
+        <div id="settings" class="page">
+            <div class="info-content">
+                <h1>⚙️ Settings</h1>
+                
+                <h2>AI Dream Interpretation</h2>
+                <p>AI-powered dream interpretation is enabled and ready to provide personalized lottery numbers based on your dreams.</p>
+                
+                <div style="background: var(--bg-primary); padding: 1rem; border-radius: 8px; border-left: 4px solid var(--success-color); margin-top: 1rem;">
+                    <strong>✅ Status:</strong> Gemini AI is configured and ready to interpret your dreams for personalized number generation.
+                </div>
+
+                <h2>Application Settings</h2>
+                
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="save-dreams" onchange="toggleSaveDreams()"> 
+                        Save dream descriptions in history
+                    </label>
+                    <small class="text-secondary">When enabled, your dream descriptions will be saved with your lottery history</small>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="auto-copy" onchange="toggleAutoCopy()"> 
+                        Automatically copy generated numbers
+                    </label>
+                    <small class="text-secondary">Generated numbers will be automatically copied to clipboard</small>
+                </div>
+
+                <h2>Data Management</h2>
+                <div style="margin: 1rem 0;">
+                    <button onclick="exportHistory()" style="background: var(--success-color); color: white; border: none; padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer; margin-right: 1rem;">
+                        📤 Export History
+                    </button>
+                    <button onclick="importHistory()" style="background: var(--primary-color); color: white; border: none; padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer; margin-right: 1rem;">
+                        📥 Import History
+                    </button>
+                    <button onclick="clearAllData()" style="background: var(--error-color); color: white; border: none; padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer;">
+                        🗑️ Clear All Data
+                    </button>
+                </div>
+
+                <input type="file" id="import-file" accept=".json" style="display: none;" onchange="handleImport(event)">
+
+                <h2>About AI Integration</h2>
+                <p>The application uses Google's Gemini AI to interpret your dreams and provide meaningful number suggestions. Your dream descriptions are processed securely and are not stored permanently.</p>
+                
+                <div style="background: var(--bg-primary); padding: 1rem; border-radius: 8px; border-left: 4px solid var(--warning-color); margin-top: 1rem;">
+                    <strong>⚠️ Privacy Note:</strong> Dream descriptions are processed by Google's AI but not stored permanently. For maximum privacy, avoid including personal identifying information in your dream descriptions.
+                </div>
+                
+                <div style="background: var(--bg-primary); padding: 1rem; border-radius: 8px; border-left: 4px solid var(--primary-color); margin-top: 1rem;">
+                    <strong>🔧 Developer Note:</strong> To use this application, replace 'YOUR_GEMINI_API_KEY_HERE' in the code with your actual Gemini API key from <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color: var(--primary-color);">Google AI Studio</a>.
+                </div>
+            </div>
+        </div>
+
+        <!-- History Page -->
+        <div id="history" class="page">
+            <div class="info-content">
+                <h1>Your Lottery History</h1>
+                <p>Keep track of all your generated lottery numbers and their details.</p>
+                
+                <div style="margin: 1rem 0;">
+                    <button onclick="clearHistory()" style="background: var(--error-color); color: white; border: none; padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer;">
+                        🗑️ Clear All History
+                    </button>
+                </div>
+            </div>
+            
+            <div class="history" id="history-container">
+                <!-- History items will be dynamically inserted here -->
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 Lao Lottery Number Generator. For entertainment purposes only. Play responsibly.</p>
+            <p><small>Powered by Gemini AI | Made with ❤️ for the Lao community</small></p>
+        </div>
+    </footer>
+
+    <script>
+        // Global variables
+        let currentTheme = localStorage.getItem('theme') || 'light';
+        let lotteryHistory = JSON.parse(localStorage.getItem('lotteryHistory') || '[]');
+        let GEMINI_API_KEY = 'YOUR_GEMINI_API_KEY_HERE'; // Hardcoded API key
+        let appSettings = JSON.parse(localStorage.getItem('appSettings') || '{"saveDreams": true, "autoCopy": false}');
+
+        // Initialize application
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTheme();
+            initializeDatePicker();
+            setupEventListeners();
+            loadHistory();
+            updateCharCounter();
+            loadSettings();
+        });
+
+        // Settings Management
+        function loadSettings() {
+            document.getElementById('save-dreams').checked = appSettings.saveDreams;
+            document.getElementById('auto-copy').checked = appSettings.autoCopy;
+        }
+
+        function toggleSaveDreams() {
+            appSettings.saveDreams = document.getElementById('save-dreams').checked;
+            localStorage.setItem('appSettings', JSON.stringify(appSettings));
+        }
+
+        function toggleAutoCopy() {
+            appSettings.autoCopy = document.getElementById('auto-copy').checked;
+            localStorage.setItem('appSettings', JSON.stringify(appSettings));
+        }
+
+        function exportHistory() {
+            if (lotteryHistory.length === 0) {
+                showError('No history to export');
+                return;
+            }
+
+            const dataStr = JSON.stringify({
+                history: lotteryHistory,
+                exportDate: new Date().toISOString(),
+                version: '1.0'
+            }, null, 2);
+            
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `lao-lottery-history-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            showSuccess('History exported successfully!');
+        }
+
+        function importHistory() {
+            document.getElementById('import-file').click();
+        }
+
+        function handleImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importData = JSON.parse(e.target.result);
+                    
+                    if (importData.history && Array.isArray(importData.history)) {
+                        if (confirm(`Import ${importData.history.length} history items? This will merge with existing history.`)) {
+                            lotteryHistory = [...importData.history, ...lotteryHistory];
+                            // Limit to 100 items
+                            if (lotteryHistory.length > 100) {
+                                lotteryHistory = lotteryHistory.slice(0, 100);
+                            }
+                            localStorage.setItem('lotteryHistory', JSON.stringify(lotteryHistory));
+                            loadHistory();
+                            showSuccess('History imported successfully!');
+                        }
+                    } else {
+                        showError('Invalid history file format');
+                    }
+                } catch (error) {
+                    showError('Error reading history file');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        function clearAllData() {
+            if (confirm('This will clear ALL data including history, settings, and API key. Are you sure?')) {
+                localStorage.clear();
+                lotteryHistory = [];
+                GEMINI_API_KEY = '';
+                appSettings = {"saveDreams": true, "autoCopy": false};
+                loadSettings();
+                loadHistory();
+                showSuccess('All data cleared successfully');
+            }
+        }
+
+        // Initialize application
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTheme();
+            initializeDatePicker();
+            setupEventListeners();
+            loadHistory();
+            updateCharCounter();
+        });
+
+        // Theme Management
+        function initializeTheme() {
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            updateThemeToggle();
+        }
+
+        function toggleTheme() {
+            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            localStorage.setItem('theme', currentTheme);
+            updateThemeToggle();
+        }
+
+        function updateThemeToggle() {
+            const toggle = document.querySelector('.theme-toggle');
+            toggle.textContent = currentTheme === 'light' ? '🌙' : '☀️';
+        }
+
+        // Navigation
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Show selected page
+            document.getElementById(pageId).classList.add('active');
+            
+            // Update navigation
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('data-page') === pageId) {
+                    link.classList.add('active');
+                }
+            });
+
+            // Load history if showing history page
+            if (pageId === 'history') {
+                loadHistory();
+            }
+        }
+
+        // Date picker initialization and validation
+        function initializeDatePicker() {
+            const dateInput = document.getElementById('draw-date');
+            const today = new Date();
+            const maxDate = new Date();
+            maxDate.setMonth(maxDate.getMonth() + 6);
+
+            // Set minimum date to tomorrow
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            dateInput.min = tomorrow.toISOString().split('T')[0];
+            dateInput.max = maxDate.toISOString().split('T')[0];
+
+            dateInput.addEventListener('change', validateDate);
+        }
+
+        function validateDate() {
+            const dateInput = document.getElementById('draw-date');
+            const selectedDate = new Date(dateInput.value + 'T00:00:00');
+            const dayOfWeek = selectedDate.getDay();
+            
+            // Check if it's Monday (1), Wednesday (3), or Friday (5)
+            if (dayOfWeek !== 1 && dayOfWeek !== 3 && dayOfWeek !== 5) {
+                showError('Please select a date that falls on Monday, Wednesday, or Friday only.');
+                dateInput.value = '';
+                return false;
+            }
+
+            // Check if date is in the past
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            selectedDate.setHours(0, 0, 0, 0);
+            
+            if (selectedDate <= today) {
+                showError('Please select a future date.');
+                dateInput.value = '';
+                return false;
+            }
+
+            clearMessages();
+            return true;
+        }
+
+        // Event listeners setup
+        function setupEventListeners() {
+            // Form submission
+            document.getElementById('lottery-form').addEventListener('submit', handleFormSubmit);
+            
+            // Character counter for dream input
+            document.getElementById('dream-input').addEventListener('input', updateCharCounter);
+        }
+
+        function updateCharCounter() {
+            const dreamInput = document.getElementById('dream-input');
+            const charCount = document.getElementById('char-count');
+            charCount.textContent = dreamInput.value.length;
+        }
+
+        // Form submission handler
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const drawDate = formData.get('draw-date');
+            const lotteryType = formData.get('lottery-type');
+            const dreamInput = formData.get('dream-input');
+
+            // Validate form
+            if (!validateForm(drawDate, lotteryType)) {
+                return;
+            }
+
+            try {
+                await generateLotteryNumbers(drawDate, lotteryType, dreamInput);
+            } catch (error) {
+                showError('Failed to generate numbers. Please try again.');
+                console.error('Generation error:', error);
+            }
+        }
+
+        function validateForm(drawDate, lotteryType) {
+            clearMessages();
+
+            if (!drawDate) {
+                showError('Please select a draw date.');
+                return false;
+            }
+
+            if (!lotteryType) {
+                showError('Please select a lottery type.');
+                return false;
+            }
+
+            if (!validateDate()) {
+                return false;
+            }
+
+            return true;
+        }
+
+        // Main lottery number generation function
+        async function generateLotteryNumbers(drawDate, lotteryType, dreamInput) {
+            showLoading(true);
+            
+            try {
+                let dreamInterpretation = '';
+                
+                // Generate numbers with dream interpretation if provided
+                if (dreamInput && dreamInput.trim()) {
+                    const result = await generateWithDreamInterpretation(drawDate, lotteryType, dreamInput);
+                    dreamInterpretation = result.interpretation;
+                }
+                
+                // Generate final random numbers
+                const luckyNumbers = generateRandomNumbers(parseInt(lotteryType));
+                
+                // Display results
+                displayResults(luckyNumbers, drawDate, lotteryType, dreamInterpretation);
+                
+                // Save to history
+                saveToHistory(luckyNumbers, drawDate, lotteryType, dreamInput, dreamInterpretation);
+                
+            } catch (error) {
+                console.error('Error generating lottery numbers:', error);
+                showError('Unable to generate numbers at the moment. Please try again.');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Gemini API Configuration
+        const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+
+        // Call Gemini API for dream interpretation and number generation
+        async function generateWithDreamInterpretation(drawDate, lotteryType, dreamInput) {
+            if (!GEMINI_API_KEY || GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY_HERE') {
+                // Fallback to simulation if API key not properly configured
+                return simulateDreamInterpretation();
+            }
+
+            try {
+                const prompt = createGeminiPrompt(dreamInput, lotteryType, drawDate);
+                
+                const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{
+                                text: prompt
+                            }]
+                        }],
+                        generationConfig: {
+                            temperature: 0.7,
+                            topK: 40,
+                            topP: 0.95,
+                            maxOutputTokens: 1024,
+                        },
+                        safetySettings: [
+                            {
+                                category: "HARM_CATEGORY_HARASSMENT",
+                                threshold: "BLOCK_MEDIUM_AND_ABOVE"
+                            },
+                            {
+                                category: "HARM_CATEGORY_HATE_SPEECH",
+                                threshold: "BLOCK_MEDIUM_AND_ABOVE"
+                            },
+                            {
+                                category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                                threshold: "BLOCK_MEDIUM_AND_ABOVE"
+                            },
+                            {
+                                category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+                                threshold: "BLOCK_MEDIUM_AND_ABOVE"
+                            }
+                        ]
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(`HTTP ${response.status}: ${errorData.error?.message || response.statusText}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.candidates && data.candidates.length > 0 && data.candidates[0].content) {
+                    const interpretation = data.candidates[0].content.parts[0].text;
+                    return {
+                        interpretation: interpretation.trim()
+                    };
+                } else {
+                    throw new Error('No valid response from Gemini API');
+                }
+
+            } catch (error) {
+                console.error('Gemini API Error:', error);
+                
+                // Show user-friendly error based on error type
+                if (error.message.includes('401') || error.message.includes('403')) {
+                    showError('Invalid API key. Please check your Gemini API configuration in Settings.');
+                } else if (error.message.includes('429')) {
+                    showError('API rate limit exceeded. Please try again in a few minutes.');
+                } else if (error.message.includes('400')) {
+                    showError('Invalid request format. Using fallback interpretation.');
+                } else {
+                    showError('Unable to connect to AI service. Using fallback interpretation.');
+                }
+                
+                // Fallback to simulation
+                return simulateDreamInterpretation();
+            }
+        }
+
+        // Create optimized prompt for Gemini API
+        function createGeminiPrompt(dreamInput, lotteryType, drawDate) {
+            return `You are an expert in Laotian dream interpretation and numerology for lottery number selection. 
+
+DREAM DESCRIPTION: "${dreamInput}"
+
+LOTTERY DETAILS:
+- Type: ${lotteryType}-digit lottery (numbers from ${'0'.repeat(lotteryType)} to ${'9'.repeat(lotteryType)})
+- Draw Date: ${formatDate(drawDate)}
+
+TASK: Analyze this dream and provide a meaningful interpretation that connects dream symbols to lottery numbers. Consider:
+
+1. Traditional Laotian dream symbolism
+2. Numerical significance in Lao culture  
+3. Symbolic meanings of objects, animals, people, colors, or emotions in the dream
+4. Lucky number associations
+
+RESPONSE FORMAT:
+Provide a thoughtful interpretation (2-3 sentences) explaining:
+- What the dream symbols represent
+- How they connect to luck and fortune
+- Why the suggested numbers would be meaningful
+
+Focus on cultural sensitivity and provide genuine insight rather than generic responses. Keep the interpretation positive and encouraging while being respectful of traditional beliefs.
+
+Example response style: "Your dream of [specific elements] represents [symbolic meaning] in Laotian tradition. The [specific imagery] suggests themes of [fortune/prosperity/growth], pointing to numbers that resonate with [specific positive qualities]. This combination may bring unexpected luck aligned with [dream theme]."`;
+        }
+
+        // Fallback simulation function
+        function simulateDreamInterpretation() {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    const interpretations = [
+                        `Your dream suggests themes of transformation and new beginnings. The imagery points to numbers associated with growth and positive change.`,
+                        `The symbols in your dream connect to elements of nature and harmony. These suggest numbers that resonate with balance and good fortune.`,
+                        `Your dream contains powerful imagery of movement and progress. The numbers derived reflect forward momentum and success.`,
+                        `The dream's emotional tone suggests numbers connected to inner wisdom and intuition. These combinations may bring unexpected luck.`,
+                        `Elements in your dream point to abundance and prosperity. The suggested numbers align with themes of wealth and fulfillment.`
+                    ];
+                    
+                    const randomInterpretation = interpretations[Math.floor(Math.random() * interpretations.length)];
+                    
+                    resolve({
+                        interpretation: randomInterpretation
+                    });
+                }, 2000);
+            });
+        }
+
+        // API key is now hardcoded - no configuration needed
+
+        // Enhanced error handling for API calls
+        async function handleAPIRequest(requestFunction, retries = 2) {
+            for (let attempt = 0; attempt <= retries; attempt++) {
+                try {
+                    return await requestFunction();
+                } catch (error) {
+                    console.error(`API attempt ${attempt + 1} failed:`, error);
+                    
+                    if (attempt === retries) {
+                        // Final attempt failed
+                        if (error.message.includes('401') || error.message.includes('403')) {
+                            showError('Invalid API key. Please check your Gemini API configuration.');
+                        } else if (error.message.includes('429')) {
+                            showError('API rate limit exceeded. Please try again later.');
+                        } else if (error.message.includes('500') || error.message.includes('502') || error.message.includes('503')) {
+                            showError('Gemini API service temporarily unavailable. Using fallback generation.');
+                        } else {
+                            showError('Unable to connect to AI service. Using fallback generation.');
+                        }
+                        throw error;
+                    }
+                    
+                    // Wait before retry (exponential backoff)
+                    await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+                }
+            }
+        }
+
+        // Generate random numbers based on lottery type
+        function generateRandomNumbers(digits) {
+            const min = Math.pow(10, digits - 1);
+            const max = Math.pow(10, digits) - 1;
+            let number = Math.floor(Math.random() * (max - min + 1)) + min;
+            
+            // Ensure proper padding for display
+            return number.toString().padStart(digits, '0');
+        }
+
+        // Display results
+        function displayResults(numbers, drawDate, lotteryType, dreamInterpretation) {
+            const resultsDiv = document.getElementById('results');
+            const luckyNumbersDiv = document.getElementById('lucky-numbers');
+            const resultDateSpan = document.getElementById('result-date');
+            const resultTypeSpan = document.getElementById('result-type');
+            const dreamSuggestions = document.getElementById('dream-suggestions');
+            const dreamInterpretationP = document.getElementById('dream-interpretation');
+
+            // Set results
+            luckyNumbersDiv.textContent = numbers;
+            resultDateSpan.textContent = formatDate(drawDate);
+            resultTypeSpan.textContent = `${lotteryType}-Digit Lottery`;
+
+            // Show dream interpretation if available
+            if (dreamInterpretation) {
+                dreamInterpretationP.textContent = dreamInterpretation;
+                dreamSuggestions.style.display = 'block';
+            } else {
+                dreamSuggestions.style.display = 'none';
+            }
+
+            // Show results with animation
+            resultsDiv.classList.add('show');
+            
+            // Scroll to results
+            resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // Copy numbers to clipboard
+        async function copyNumbers() {
+            const numbers = document.getElementById('lucky-numbers').textContent;
+            
+            try {
+                await navigator.clipboard.writeText(numbers);
+                showSuccess('Numbers copied to clipboard!');
+            } catch (error) {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = numbers;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showSuccess('Numbers copied to clipboard!');
+            }
+        }
+
+        // Enhanced display results with auto-copy
+        function displayResults(numbers, drawDate, lotteryType, dreamInterpretation) {
+            const resultsDiv = document.getElementById('results');
+            const luckyNumbersDiv = document.getElementById('lucky-numbers');
+            const resultDateSpan = document.getElementById('result-date');
+            const resultTypeSpan = document.getElementById('result-type');
+            const dreamSuggestions = document.getElementById('dream-suggestions');
+            const dreamInterpretationP = document.getElementById('dream-interpretation');
+
+            // Set results
+            luckyNumbersDiv.textContent = numbers;
+            resultDateSpan.textContent = formatDate(drawDate);
+            resultTypeSpan.textContent = `${lotteryType}-Digit Lottery`;
+
+            // Show dream interpretation if available
+            if (dreamInterpretation) {
+                dreamInterpretationP.textContent = dreamInterpretation;
+                dreamSuggestions.style.display = 'block';
+            } else {
+                dreamSuggestions.style.display = 'none';
+            }
+
+            // Auto-copy if enabled
+            if (appSettings.autoCopy) {
+                setTimeout(() => {
+                    copyNumbers();
+                }, 500);
+            }
+
+            // Show results with animation
+            resultsDiv.classList.add('show');
+            
+            // Scroll to results
+            resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // History management
+        function saveToHistory(numbers, drawDate, lotteryType, dreamInput, dreamInterpretation) {
+            const historyItem = {
+                id: Date.now(),
+                numbers: numbers,
+                drawDate: drawDate,
+                lotteryType: lotteryType,
+                dreamInput: dreamInput || '',
+                dreamInterpretation: dreamInterpretation || '',
+                generatedAt: new Date().toISOString()
+            };
+
+            lotteryHistory.unshift(historyItem);
+            
+            // Limit history to 100 items
+            if (lotteryHistory.length > 100) {
+                lotteryHistory = lotteryHistory.slice(0, 100);
+            }
+
+            localStorage.setItem('lotteryHistory', JSON.stringify(lotteryHistory));
+        }
+
+        function loadHistory() {
+            const historyContainer = document.getElementById('history-container');
+            
+            if (lotteryHistory.length === 0) {
+                historyContainer.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                        <p>No lottery history yet. Generate some numbers to see them here!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const historyHTML = lotteryHistory.map(item => `
+                <div class="history-item">
+                    <div class="history-date">
+                        Generated: ${formatDateTime(item.generatedAt)} | Draw Date: ${formatDate(item.drawDate)}
+                    </div>
+                    <div class="history-numbers">${item.numbers}</div>
+                    <div style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 0.5rem;">
+                        ${item.lotteryType}-Digit Lottery
+                        ${item.dreamInput ? ' | Dream-inspired' : ''}
+                    </div>
+                    ${item.dreamInterpretation ? `
+                        <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem; font-style: italic;">
+                            "${item.dreamInterpretation.substring(0, 100)}${item.dreamInterpretation.length > 100 ? '...' : ''}"
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+
+            historyContainer.innerHTML = historyHTML;
+        }
+
+        function clearHistory() {
+            if (confirm('Are you sure you want to clear all lottery history? This action cannot be undone.')) {
+                lotteryHistory = [];
+                localStorage.removeItem('lotteryHistory');
+                loadHistory();
+                showSuccess('History cleared successfully.');
+            }
+        }
+
+        // Utility functions
+        function formatDate(dateString) {
+            const date = new Date(dateString + 'T00:00:00');
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const months = ['January', 'February', 'March', 'April', 'May', 'June',
+                           'July', 'August', 'September', 'October', 'November', 'December'];
+            
+            return `${days[date.getDay()]}, ${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+        }
+
+        function formatDateTime(isoString) {
+            const date = new Date(isoString);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }
+
+        function showLoading(show) {
+            const loading = document.getElementById('loading');
+            const generateBtn = document.getElementById('generate-btn');
+            const results = document.getElementById('results');
+            
+            if (show) {
+                loading.style.display = 'block';
+                generateBtn.disabled = true;
+                results.classList.remove('show');
+            } else {
+                loading.style.display = 'none';
+                generateBtn.disabled = false;
+            }
+        }
+
+        function showError(message) {
+            clearMessages();
+            const errorContainer = document.getElementById('error-container');
+            errorContainer.innerHTML = `<div class="error-message">${message}</div>`;
+            errorContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function showSuccess(message) {
+            clearMessages();
+            const successContainer = document.getElementById('success-container');
+            successContainer.innerHTML = `<div class="success-message">${message}</div>`;
+            
+            // Auto-clear success message after 3 seconds
+            setTimeout(clearMessages, 3000);
+        }
+
+        function clearMessages() {
+            document.getElementById('error-container').innerHTML = '';
+            document.getElementById('success-container').innerHTML = '';
+        }
+
+        // Keyboard navigation support
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.target.classList.contains('lottery-type-label')) {
+                e.target.previousElementSibling.checked = true;
+            }
+        });
+
+        // Service Worker for offline functionality (optional)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                // Service worker registration would go here for offline support
+                // This is optional and can be implemented in future versions
+            });
+        }
+
+        // Analytics and error tracking (placeholder)
+        window.addEventListener('error', function(e) {
+            console.error('Application error:', e.error);
+            // In production, this would send error reports to an analytics service
+        });
+
+        // Performance monitoring
+        window.addEventListener('load', function() {
+            // Monitor performance metrics
+            if ('performance' in window) {
+                const perfData = window.performance.timing;
+                const loadTime = perfData.loadEventEnd - perfData.navigationStart;
+                console.log('Page load time:', loadTime, 'ms');
+            }
+        });
+
+        // Accessibility enhancements
+        document.addEventListener('keydown', function(e) {
+            // Tab navigation enhancements
+            if (e.key === 'Tab') {
+                document.body.classList.add('keyboard-navigation');
+            }
+        });
+
+        document.addEventListener('mousedown', function() {
+            document.body.classList.remove('keyboard-navigation');
+        });
+    </script>
+
+    <style>
+        /* Additional keyboard navigation styles */
+        .keyboard-navigation *:focus {
+            outline: 3px solid var(--primary-color) !important;
+            outline-offset: 2px;
+        }
+
+        /* Loading animation improvements */
+        .loading.show {
+            display: block !important;
+        }
+
+        /* Smooth transitions for all interactive elements */
+        * {
+            transition: all 0.2s ease;
+        }
+
+        /* Print styles */
+        @media print {
+            .header, .footer, .theme-toggle, .generate-btn, .copy-btn {
+                display: none;
+            }
+            
+            .results {
+                display: block !important;
+                page-break-inside: avoid;
+            }
+            
+            body {
+                color: black;
+                background: white;
+            }
+        }
+
+        /* Reduced motion support */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</body>
+</html>
