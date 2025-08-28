@@ -1540,10 +1540,8 @@
         const maxDate = new Date();
         maxDate.setMonth(maxDate.getMonth() + 6);
 
-        // Set minimum date to tomorrow
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        dateInput.min = tomorrow.toISOString().split("T")[0];
+        // Set minimum date to today (allow selecting today if it's a valid draw day)
+        dateInput.min = today.toISOString().split("T")[0];
         dateInput.max = maxDate.toISOString().split("T")[0];
 
         dateInput.addEventListener("change", validateDate);
@@ -1563,13 +1561,13 @@
           return false;
         }
 
-        // Check if date is in the past
+        // Check if date is in the past (but allow today)
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         selectedDate.setHours(0, 0, 0, 0);
 
-        if (selectedDate <= today) {
-          showError("Please select a future date.");
+        if (selectedDate < today) {
+          showError("Please select today or a future date.");
           dateInput.value = "";
           return false;
         }
